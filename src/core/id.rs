@@ -1,7 +1,6 @@
 use std::{ops::Deref, sync::Arc};
 use tokio_xmpp::jid::{BareJid, Jid};
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 // TODO: perhaps make the inner private in the future
 // TODO: find a more descritpive name if poosible
@@ -21,7 +20,7 @@ impl From<BareJid> for Id {
 
 impl AsRef<BareJid> for Id {
     fn as_ref(&self) -> &BareJid {
-        self.deref() 
+        self.deref()
     }
 }
 
@@ -42,4 +41,3 @@ impl std::fmt::Display for Id {
 unsafe impl Send for Id {}
 
 unsafe impl Sync for Id {}
-

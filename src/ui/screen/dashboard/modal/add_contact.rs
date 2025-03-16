@@ -1,13 +1,12 @@
 use std::sync::Arc;
 
-use async_channel::Sender;
-use crate::core::event::UiEvent;
-use iced::widget::{self, *, column};
-use iced::*;
-use tokio_xmpp::jid::BareJid;
 use super::modal;
 use crate::core::contact::ContactId;
-
+use crate::core::event::UiEvent;
+use async_channel::Sender;
+use iced::widget::{self, column, *};
+use iced::*;
+use tokio_xmpp::jid::BareJid;
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -18,14 +17,13 @@ pub enum Message {
 }
 
 pub struct AddContact {
-    pub show: bool, 
+    pub show: bool,
     pub sender: Sender<UiEvent>,
     pub text_input_jid: String,
     pub error: String,
 }
 
 impl AddContact {
-
     pub fn new(sender: Sender<UiEvent>) -> Self {
         Self {
             sender,
@@ -35,20 +33,16 @@ impl AddContact {
         }
     }
 
-    // TODO find a more descriptive name 
-    pub fn update<F>(
-        &mut self, 
-        message: Message,
-        mut new_contact: F        
-    ) -> Task<Message> 
+    // TODO find a more descriptive name
+    pub fn update<F>(&mut self, message: Message, mut new_contact: F) -> Task<Message>
     where
-        F: FnMut(ContactId)
+        F: FnMut(ContactId),
     {
         match message {
-            Message::Open => { 
+            Message::Open => {
                 self.show = true;
                 return widget::focus_next();
-            },
+            }
             Message::Close => self.close(),
             Message::TextInputJid(s) => self.text_input_jid = s,
             Message::Submit => {
@@ -58,34 +52,31 @@ impl AddContact {
                 } else {
                     self.error = String::from("Invalid Jid");
                 }
-            },
+            }
         };
 
         Task::none()
     }
 
     pub fn view<'a>(&self) -> Element<'a, Message> {
-        
-        let content = container(column![
-            text("Add Contact"),
-            text_input("jid", &self.text_input_jid)
-                .on_input(Message::TextInputJid)
-                .on_submit(Message::Submit),
-            text(self.error.clone()),
-            button("Submit")
-                .on_press(Message::Submit),
-        ]
-            .spacing(10)
+        let content = container(
+            column![
+                text("Add Contact"),
+                text_input("jid", &self.text_input_jid)
+                    .on_input(Message::TextInputJid)
+                    .on_submit(Message::Submit),
+                text(self.error.clone()),
+                button("Submit").on_press(Message::Submit),
+            ]
+            .spacing(10),
         )
-            .width(300)
-            .padding(20)
-            .style(|_theme| {
-                container::Style {
-                    background: Some(Background::Color(Color::from_rgb8(50, 50, 200))),
-                    ..Default::default()
-                }
-            });
-        
+        .width(300)
+        .padding(20)
+        .style(|_theme| container::Style {
+            background: Some(Background::Color(Color::from_rgb8(50, 50, 200))),
+            ..Default::default()
+        });
+
         let base = None::<Element<'a, Message>>;
         modal(base, content, Message::Close)
     }

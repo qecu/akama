@@ -12,14 +12,11 @@ use event::*;
 
 pub mod id;
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Status {
     Online,
     Offline,
     Connecting,
 }
-
-
 
 pub type Password = String;

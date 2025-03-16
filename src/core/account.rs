@@ -1,12 +1,11 @@
 use std::{ops::Deref, sync::Arc};
 
+use super::Status;
 use tokio_xmpp::jid::BareJid;
 use xmpp_parsers::jid::Jid;
-use super::Status;
 
 use super::id::Id;
 pub type AccountId = Id;
-
 
 /// just a type wrapper for better readiblity (hopefuly)
 //pub type AccountId = BareJid;
@@ -21,7 +20,7 @@ pub type AccountId = Id;
 //
 //impl AsRef<BareJid> for AccountId {
 //    fn as_ref(&self) -> &BareJid {
-//        self.deref() 
+//        self.deref()
 //    }
 //}
 //
@@ -39,19 +38,15 @@ pub type AccountId = Id;
 //    }
 //}
 
-
 #[derive(Debug, Clone)]
 pub struct Account {
     jid: Jid,
-    status: Status, 
+    status: Status,
 }
 
 impl Account {
     pub fn new(jid: Jid, status: Status) -> Self {
-        Self {
-            jid,
-            status,
-        }
+        Self { jid, status }
     }
 
     pub fn set_jid(&mut self, jid: Jid) {
@@ -69,5 +64,4 @@ impl Account {
     pub fn set_status(&mut self, status: Status) {
         self.status = status
     }
-
 }

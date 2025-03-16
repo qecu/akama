@@ -4,7 +4,7 @@ use xmpp_parsers::jid::{BareJid, Jid};
 
 //use crate::*;
 
-use tokio_xmpp::{connect::StartTlsServerConnector, Client};
+use tokio_xmpp::{Client, connect::StartTlsServerConnector};
 
 use super::contact::{Contact, ContactId};
 
@@ -24,13 +24,13 @@ impl std::fmt::Debug for XmppClientWrapper {
 impl XmppClientWrapper {
     #[allow(unused)]
     pub fn into_inner(self) -> StartTlsClient {
-        return self.0
+        return self.0;
     }
 }
 
 impl From<StartTlsClient> for XmppClientWrapper {
     fn from(value: StartTlsClient) -> Self {
-        Self(value) 
+        Self(value)
     }
 }
 
@@ -62,23 +62,23 @@ pub enum UiEvent {
     },
 
     #[deprecated]
-    NewXmppClientt(Jid, XmppClientWrapper)
+    NewXmppClientt(Jid, XmppClientWrapper),
 }
 
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
 pub enum BackendEvent {
-    AccountOnline(AccountId, Jid), 
+    AccountOnline(AccountId, Jid),
     Account(AccountId, Account),
     AccountStatusUpdate(ContactId, Status),
 
     Contacts(Vec<(AccountId, ContactId, Contact)>),
 
-    Contact { 
-        account: AccountId, 
-        contact: ContactId, 
-        chats: Vec<(bool, String)>
+    Contact {
+        account: AccountId,
+        contact: ContactId,
+        chats: Vec<(bool, String)>,
     },
 
     Message {
@@ -88,5 +88,4 @@ pub enum BackendEvent {
         by_me: bool,
         timestamp: DateTime<Utc>,
     },
-
 }

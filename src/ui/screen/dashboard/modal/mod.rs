@@ -3,10 +3,9 @@ pub use add_account::AddAccount;
 
 pub mod add_contact;
 
+use iced::widget::*;
 use iced::*;
 use widget::{opaque, stack};
-use iced::widget::*;
-
 
 fn modal<'a, Message>(
     base: Option<impl Into<Element<'a, Message>>>,

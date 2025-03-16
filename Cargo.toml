@@ -1,14 +1,13 @@
 [package]
 name = "akama"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 simplelog = { version = "0.12.2", features = ["ansi_term"] }
 tokio = { version = "1.41.1", features = ["full"] }
 log = "0.4.22"
 async-channel = "2.3.1"
-# clap = { version = "4.5.23", features = ["derive"] }
 iced_winit = "0.13.0"
 
 tokio-xmpp = { git = "https://gitlab.com/xmpp-rs/xmpp-rs.git", rev = "dc842c44d1d5c1eaa6e88e536ae3af4b82faad61"}
@@ -16,14 +15,11 @@ xmpp-parsers = { git = "https://gitlab.com/xmpp-rs/xmpp-rs.git", rev = "dc842c44
 
 futures = "0.3.31"
 minidom = "0.16.0"
-# rusqlite = { version = "0.32.1", features = ["bundled", "chrono"] }
 anyhow = "1.0.94"
 chrono = "0.4.39"
-# human-time = "0.1.6"
 sqlx = { version = "0.8.3", features = ["chrono", "runtime-tokio", "sqlite"] }
 uuid = { version = "1.11.1", features = ["v4"] }
 
 iced = { version = "0.13.1", features = ["tokio", "canvas", "advanced"] }
 fastrand = "2.2.0"
-# humantime = "2.1.0"
 iced_aw = "0.12.2"

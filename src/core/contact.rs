@@ -1,11 +1,11 @@
-use std::ops::Deref;
 use chrono::NaiveDateTime;
+use std::ops::Deref;
 use std::sync::Arc;
 
-use xmpp_parsers::jid::Jid;
-use xmpp_parsers::jid::BareJid;
 use super::Message;
 use super::Status;
+use xmpp_parsers::jid::BareJid;
+use xmpp_parsers::jid::Jid;
 
 use super::id::Id;
 
@@ -20,7 +20,7 @@ pub type ContactId = Id;
 //
 //impl AsRef<BareJid> for ContactIdd {
 //    fn as_ref(&self) -> &BareJid {
-//        self.deref() 
+//        self.deref()
 //    }
 //}
 //
@@ -32,21 +32,15 @@ pub type ContactId = Id;
 //    }
 //}
 
-
-
 #[derive(Debug, Clone)]
 pub struct Contact {
     jid: ContactId,
     status: Status,
-    pub chat_history: Vec<Message>
+    pub chat_history: Vec<Message>,
 }
 
 impl Contact {
-    pub fn new(
-        jid: ContactId, 
-        status: Status,
-        chat_history: Vec<Message>,
-    ) -> Self {
+    pub fn new(jid: ContactId, status: Status, chat_history: Vec<Message>) -> Self {
         Self {
             jid,
             status,
@@ -72,6 +66,7 @@ impl Contact {
 
     pub fn new_text(&mut self, text: String, by_me: bool) {
         let naive = chrono::Utc::now().naive_utc();
-        self.chat_history.push(Message::new_text(text, by_me, naive));
+        self.chat_history
+            .push(Message::new_text(text, by_me, naive));
     }
 }
