@@ -6,6 +6,12 @@ use tokio_xmpp::jid::{BareJid, Jid};
 // TODO: find a more descritpive name if poosible
 pub struct Id(pub Arc<BareJid>);
 
+impl Id {
+    pub fn new(jid: Jid) -> Self {
+        Self(Arc::new(jid.to_bare())) 
+    }
+}
+
 impl From<Jid> for Id {
     fn from(value: Jid) -> Self {
         Id(Arc::new(value.to_bare()))

@@ -1,12 +1,11 @@
-use std::sync::Arc;
-
-use super::modal;
-use crate::core::contact::ContactId;
-use crate::core::event::UiEvent;
 use async_channel::Sender;
 use iced::widget::{self, column, *};
 use iced::*;
 use tokio_xmpp::jid::BareJid;
+use crate::screen::dashboard::Message as DashboardMessage;
+use super::modal;
+use crate::common::ContactId;
+use crate::common::UiEvent;
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -88,10 +87,9 @@ impl AddContact {
     }
 }
 
-use crate::ui::dashboard::Event;
 
-impl From<Message> for Event {
+impl From<Message> for DashboardMessage {
     fn from(value: Message) -> Self {
-        Event::AddContactModal(value)
+        DashboardMessage::AddContactModal(value)
     }
 }

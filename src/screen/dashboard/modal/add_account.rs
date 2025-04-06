@@ -1,11 +1,10 @@
-use super::modal;
-use crate::core::event::UiEvent;
-use async_channel::Sender;
-use futures::StreamExt;
-use iced::widget::{self, column, *};
 use iced::*;
+use iced::widget::{self, column, *};
+use futures::StreamExt;
+use async_channel::Sender;
 use tokio_xmpp::jid::Jid;
-use xmpp_parsers::presence::Presence;
+use crate::common::UiEvent;
+use crate::screen::dashboard::Message as DashboradMessage;
 
 #[derive(Debug, Clone)]
 pub enum Message {
@@ -34,19 +33,18 @@ impl AddAccount {
             show: false,
             text_input_jid: String::new(),
             text_input_password: String::new(),
-            error: String::new(),
-            submit_pending: false,
+            error: String::new(), submit_pending: false,
         }
     }
 
-    pub fn update<F>(&mut self, message: Message, mut new_account_jid: F) -> Task<Message>
+    pub fn update<F>(&mut self, message: Message, mut new_account_jid: F) -> Option<Task<Message>>
     where
         F: FnMut(Jid),
     {
         match message {
             Message::Open => {
                 self.show = true;
-                return widget::focus_next();
+                return Some(widget::focus_next());
             }
             Message::Close => {
                 self.text_input_jid.clear();
@@ -70,7 +68,7 @@ impl AddAccount {
 
                 let password = self.text_input_password.clone();
 
-                return Task::perform(
+                return Some(Task::perform(
                     new_xmpp_client(jid, password, self.sender.clone()),
                     |result| {
                         match result {
@@ -82,7 +80,7 @@ impl AddAccount {
                             Err(err) => Message::LoginFailed(err),
                         }
                     },
-                );
+                ));
             }
             Message::LoginSuccesful(jid) => {
                 new_account_jid(jid);
@@ -93,8 +91,9 @@ impl AddAccount {
                 self.submit_pending = false;
             } //_ => { unreachable!() }
         };
+    
 
-        Task::none()
+        None
     }
 
     pub fn view<'a>(&self) -> Element<'a, Message> {
@@ -141,7 +140,7 @@ async fn new_xmpp_client(
     sender: Sender<UiEvent>,
 ) -> std::result::Result<Jid, String> {
     use tokio_xmpp::Client;
-    use xmpp_parsers::presence::*;
+    use tokio_xmpp::parsers::presence::*;
 
     let mut client = Client::new(jid, password.clone());
 
@@ -184,12 +183,9 @@ async fn new_xmpp_client(
     }
 }
 
-//use crate::Event;
-//use super::Event;
-use crate::ui::dashboard::Event;
 
-impl From<Message> for Event {
+impl From<Message> for DashboradMessage {
     fn from(value: Message) -> Self {
-        Event::AddAccountModal(value)
+        DashboradMessage::AddAccountModal(value)
     }
 }

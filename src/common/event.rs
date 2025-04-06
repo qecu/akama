@@ -1,15 +1,7 @@
-use std::{collections::HashMap, sync::Arc};
-
-use xmpp_parsers::jid::{BareJid, Jid};
-
-//use crate::*;
-
+use tokio_xmpp::parsers::jid::{BareJid, Jid};
 use tokio_xmpp::{Client, connect::StartTlsServerConnector};
+use super::{Account, AccountId, Status, Id, contact::{Contact, ContactId}};
 
-use super::contact::{Contact, ContactId};
-
-use super::id::Id;
-use super::{Account, AccountId, Status};
 
 pub type StartTlsClient = Client<StartTlsServerConnector>;
 
@@ -36,8 +28,8 @@ impl From<StartTlsClient> for XmppClientWrapper {
 
 #[derive(Debug)]
 pub enum UiEvent {
-    Ping,
-    RequestContacts(AccountId),
+    // Ping,
+    // RequestContacts(AccountId),
     DisconnectAccount(AccountId),
     NewContact(AccountId, ContactId),
     NewTextMessage {
@@ -47,31 +39,23 @@ pub enum UiEvent {
     },
     NewText {
         // TODO replace Arc<BareJid> with a proper struct
-        from: Id, // TODO: replace Id with their descriptive counterpart AccountId, and ContactId
-        to: Id,
+        from: AccountId, // TODO: replace Id with their descriptive counterpart AccountId, and ContactId
+        to: ContactId,
         content: String,
-    },
-    NewAccount {
-        jid: Jid,
-        password: String,
     },
     NewXmppClient {
         jid: Jid,
         password: String,
         client: XmppClientWrapper,
     },
-
-    #[deprecated]
-    NewXmppClientt(Jid, XmppClientWrapper),
 }
 
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
 pub enum BackendEvent {
-    AccountOnline(AccountId, Jid),
     Account(AccountId, Account),
-    AccountStatusUpdate(ContactId, Status),
+    AccountStatusUpdate(AccountId, Status),
 
     Contacts(Vec<(AccountId, ContactId, Contact)>),
 
@@ -87,5 +71,6 @@ pub enum BackendEvent {
         body: String,
         by_me: bool,
         timestamp: DateTime<Utc>,
+        id: Option<String>,
     },
 }

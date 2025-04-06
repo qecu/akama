@@ -1,36 +1,8 @@
-use chrono::NaiveDateTime;
-use std::ops::Deref;
-use std::sync::Arc;
+use tokio_xmpp::jid::Jid;
+use super::{Message, Status, Id};
 
-use super::Message;
-use super::Status;
-use xmpp_parsers::jid::BareJid;
-use xmpp_parsers::jid::Jid;
-
-use super::id::Id;
 
 pub type ContactId = Id;
-
-//#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-//pub struct ContactIdd(Arc<BareJid>);
-//
-//unsafe impl Send for ContactIdd {}
-//
-//unsafe impl Sync for ContactIdd {}
-//
-//impl AsRef<BareJid> for ContactIdd {
-//    fn as_ref(&self) -> &BareJid {
-//        self.deref()
-//    }
-//}
-//
-//impl Deref for ContactIdd {
-//    type Target = BareJid;
-//
-//    fn deref(&self) -> &Self::Target {
-//        self.0.deref()
-//    }
-//}
 
 #[derive(Debug, Clone)]
 pub struct Contact {

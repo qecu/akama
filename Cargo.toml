@@ -8,10 +8,10 @@ simplelog = { version = "0.12.2", features = ["ansi_term"] }
 tokio = { version = "1.41.1", features = ["full"] }
 log = "0.4.22"
 async-channel = "2.3.1"
-iced_winit = "0.13.0"
 
 tokio-xmpp = { git = "https://gitlab.com/xmpp-rs/xmpp-rs.git", rev = "dc842c44d1d5c1eaa6e88e536ae3af4b82faad61"}
-xmpp-parsers = { git = "https://gitlab.com/xmpp-rs/xmpp-rs.git", rev = "dc842c44d1d5c1eaa6e88e536ae3af4b82faad61"}
+# tokio-xmpp = { git = "https://gitlab.com/xmpp-rs/xmpp-rs.git" }
+# xmpp-parsers = { git = "https://gitlab.com/xmpp-rs/xmpp-rs.git", rev = "dc842c44d1d5c1eaa6e88e536ae3af4b82faad61"}
 
 futures = "0.3.31"
 minidom = "0.16.0"
@@ -23,3 +23,8 @@ uuid = { version = "1.11.1", features = ["v4"] }
 iced = { version = "0.13.1", features = ["tokio", "canvas", "advanced"] }
 fastrand = "2.2.0"
 iced_aw = "0.12.2"
+serde = { version = "1.0.219", features = ["derive"] }
+toml = "0.8.20"
+
+[profile.dev.package.sqlx-macros]
+opt-level = 3

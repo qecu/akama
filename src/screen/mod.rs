@@ -1,39 +1,15 @@
-use iced::Alignment::Center;
-//use crate::core::Status;
-use iced::alignment::Vertical;
-use iced::border::Radius;
+
+use iced::*;
 use iced::widget::*;
-use iced::{Background, Border, Color, Point, Task, window};
-use iced::{Element, Fill, Length, Theme};
-
-use crate::core::Status;
-use crate::core::event::{BackendEvent, UiEvent};
-use iced::alignment::Horizontal;
-use screen::dashboard;
-use std::collections::HashMap;
-use std::collections::hash_map::Entry;
-use std::marker::PhantomData;
-use std::sync::Arc;
-use xmpp_parsers::jid::Jid;
-//use crate::core::account::{AccountId, Account};
-use crate::core::account::AccountId;
 use async_channel::{Receiver, Sender};
-use iced::widget::column;
+use dashboard::Message as DashboardMessage;
+use crate::common::{BackendEvent, UiEvent};
+pub mod dashboard;
 
-mod screen;
-
-use crate::core::account::Account;
-use crate::core::contact::{Contact, ContactId};
-use screen::dashboard::modal::{
-    add_account::{AddAccount as AddAccountModal, Message as AddAcountModalMessage},
-    add_contact::{AddContact as AddContactModal, Message as AddContactModalMessage},
-};
-
-//use crate::ui::dashboard;
 
 #[derive(Debug)]
 enum Message {
-    Dashboard(dashboard::Event),
+    Dashboard(dashboard::Message),
 }
 
 // TODO deal with name
@@ -43,12 +19,12 @@ struct Akama {
 }
 
 enum Screen {
-    Dashboard(screen::dashboard::State),
+    Dashboard(dashboard::State),
 }
 
 impl Akama {
     fn new(reciever: Receiver<BackendEvent>, sender: Sender<UiEvent>) -> (Self, Task<Message>) {
-        let dashboard = screen::dashboard::State::new(reciever.clone(), sender);
+        let dashboard = dashboard::State::new(sender);
         let (id, open) = window::open(window::Settings::default());
 
         (
@@ -57,9 +33,9 @@ impl Akama {
                 dashboard_id: id,
             },
             Task::batch([
-                open.then(|f| Task::none()),
+                open.then(|_f| Task::none()),
                 Task::run(reciever, |event| {
-                    Message::Dashboard(Event::BackendEvent(event))
+                    Message::Dashboard(DashboardMessage::BackendEvent(event))
                 }),
             ]),
         )
@@ -74,11 +50,11 @@ impl Akama {
                     .map(|message| Message::Dashboard(message));
             }
         }
-
-        Task::none()
+        // Task::none()
     }
 
     pub fn view(&self, id: window::Id) -> Element<Message> {
+        // iced::widget::radio(jjh, value, selected, on_click)
         if id == self.dashboard_id {
             self.dashboard.view().map(Message::Dashboard)
         } else {
@@ -86,8 +62,6 @@ impl Akama {
         }
     }
 }
-
-use crate::ui::dashboard::*;
 
 pub fn run(reciever: Receiver<BackendEvent>, sender: Sender<UiEvent>) {
     iced::daemon("title", Akama::update, Akama::view)

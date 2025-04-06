@@ -1,6 +1,4 @@
 pub mod add_account;
-pub use add_account::AddAccount;
-
 pub mod add_contact;
 
 use iced::widget::*;

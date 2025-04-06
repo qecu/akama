@@ -1,5 +1,4 @@
 use chrono::NaiveDateTime;
-use xmpp_parsers::jid::Jid;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Message {

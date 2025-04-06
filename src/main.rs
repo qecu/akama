@@ -1,35 +1,42 @@
-#![allow(unused)]
-
+#![allow(dead_code)]
 use simplelog::{LevelFilter, SimpleLogger};
-
 mod backend;
-mod core;
-mod ui;
-use core::event::{BackendEvent, UiEvent};
+
+/// holds shared data types between ui and backend;
+mod common;
+// mod ui;
+mod screen;
+
+use common::{BackendEvent, UiEvent};
 //use backend;
-use iced_winit::runtime::Task;
+//use iced_winit::runtime::Task;
 use simplelog::ConfigBuilder;
 
 #[tokio::main]
 async fn main() {
+    // iced::widget::radio
+    // use ui::screen::dashboard::style::Theme;
+
+    // let file = std::fs::read_to_string("mytheme.toml").unwrap();
+    // let theme: Theme = toml::from_str(file.as_str()).unwrap();
+    // println!("theme {:?}", theme);
+
+    // let ss = Column::new();
+
     let config = ConfigBuilder::new()
         .set_thread_mode(simplelog::ThreadLogMode::Both)
         .add_filter_allow_str("akama")
         .build();
     SimpleLogger::init(LevelFilter::Debug, config).unwrap();
 
-    let mut sj = 10;
-
-    sj = 20;
-
     let (ui_tx, ui_rx) = async_channel::bounded::<UiEvent>(100);
     let (backend_tx, backend_rx) = async_channel::bounded::<BackendEvent>(100);
 
     // TODO: run ui in seperate thread instead of the backend
 
-    tokio::spawn({ backend::run(ui_rx, backend_tx) });
+    tokio::spawn(backend::Backend::run(backend_tx, ui_rx));
 
-    ui::run(backend_rx, ui_tx.clone())
+    screen::run(backend_rx, ui_tx.clone())
 
     //let ui_tx_c = ui_tx.clone();
     //std::thread::spawn( || {

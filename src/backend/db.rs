@@ -1,35 +1,28 @@
-use crate::core::contact::ContactId;
-use crate::core::{AccountId, Password};
-use chrono::{DateTime, NaiveDateTime, Utc};
-use sqlx::{Pool, Sqlite, SqlitePool, pool::PoolConnection};
-use std::env;
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::sync::OnceLock;
-use tokio_xmpp::jid::{self, BareJid, Jid};
+#![allow(dead_code)]
+use std::{
+    sync::OnceLock,
+    path::PathBuf,
+};
+use sqlx::{
+    Pool, 
+    Sqlite, 
+    SqlitePool, 
+    pool::PoolConnection
+};
+use chrono::{
+    DateTime, 
+    NaiveDateTime, 
+    Utc
+};
+use tokio_xmpp::jid::{self, BareJid};
+use crate::common::ContactId;
+use crate::common::{AccountId, Password};
+
 
 pub type Conn = PoolConnection<Sqlite>;
 
 static DB: OnceLock<Pool<Sqlite>> = OnceLock::new();
 
-/// creates db if not exit. panics on error.
-pub fn get_path() -> PathBuf {
-    use std::fs;
-
-    let home = match std::env::var("HOME") {
-        Ok(v) => v,
-        Err(e) => panic!("Couldn't find $HOME var. Cannot run as root."),
-    };
-
-    let mut path = PathBuf::from(home);
-    path.push("akama");
-
-    let _ = std::fs::create_dir(path.as_path());
-    path.push("db.db");
-    let _ = fs::File::create_new(path.as_path());
-
-    path
-}
 
 pub async fn setup() -> anyhow::Result<()> {
     let path = get_path();
@@ -40,13 +33,30 @@ pub async fn setup() -> anyhow::Result<()> {
 
     let pool = SqlitePool::connect(path.as_str()).await?;
 
-    let mut conn = pool.acquire().await.unwrap();
-
     sqlx::migrate!("./migrations").run(&pool).await.unwrap();
 
     DB.set(pool).unwrap();
 
     Ok(())
+}
+
+/// creates db if not exit. panics on error.
+pub fn get_path() -> PathBuf {
+    use std::fs;
+
+    let home = match std::env::var("HOME") {
+        Ok(v) => v,
+        Err(_e) => panic!("Couldn't find $HOME var. Cannot run as root."),
+    };
+
+    let mut path = PathBuf::from(home);
+    path.push("akama");
+
+    let _ = std::fs::create_dir(path.as_path());
+    path.push("db.db");
+    let _ = fs::File::create_new(path.as_path());
+
+    path
 }
 
 pub async fn get_conn() -> Conn {
@@ -78,7 +88,12 @@ SELECT jid, password FROM account;
     .collect()
 }
 
-pub async fn add_account(jid: &AccountId, resource: Option<&jid::ResourceRef>, password: &str) {
+pub async fn add_account(
+    jid: &AccountId, 
+    _resource: Option<&jid::ResourceRef>, 
+    password: &str
+) {
+    
     let mut conn = get_conn().await;
 
     let jid = jid.as_str();
