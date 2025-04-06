@@ -1,7 +1,9 @@
+
 #![allow(dead_code)]
 use std::{
     sync::OnceLock,
     path::PathBuf,
+    fs,
 };
 use sqlx::{
     Pool, 
@@ -40,9 +42,9 @@ pub async fn setup() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[cfg(target_os="linux")]
 /// creates db if not exit. panics on error.
 pub fn get_path() -> PathBuf {
-    use std::fs;
 
     let home = match std::env::var("HOME") {
         Ok(v) => v,
@@ -50,9 +52,21 @@ pub fn get_path() -> PathBuf {
     };
 
     let mut path = PathBuf::from(home);
+
     path.push(".local/share/akama");
 
     let _ = std::fs::create_dir(path.as_path());
+    path.push("db.db");
+    let _ = fs::File::create_new(path.as_path());
+
+    path
+}
+
+/// For now, create db in the current directy
+#[cfg(not(target_os="linux"))]
+pub fn get_path() -> PathBuf {
+
+    let mut path = PathBuf::new();
     path.push("db.db");
     let _ = fs::File::create_new(path.as_path());
 
