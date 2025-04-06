@@ -65,15 +65,11 @@ impl Backend {
         
         use crate::common::Id;
         use std::sync::Arc;
-
+        
         loop {
+
             tokio::select! {
-                event = streams.next() => {
-                    if event.is_none() {
-                        println!("contineue");
-                        continue;
-                    }
-                    let (jid, event) = event.unwrap();
+                Some((jid, event)) = streams.next() => {
                     backend.handle_xmpp_event(&jid, event).await;
                 },
                 ui_event = backend.rx.recv() => {

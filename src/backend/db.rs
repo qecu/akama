@@ -50,7 +50,7 @@ pub fn get_path() -> PathBuf {
     };
 
     let mut path = PathBuf::from(home);
-    path.push("akama");
+    path.push(".local/share/akama");
 
     let _ = std::fs::create_dir(path.as_path());
     path.push("db.db");
