@@ -1,16 +1,10 @@
-
 #![allow(dead_code)]
 use std::{
-    sync::OnceLock,
+    mem::MaybeUninit,
     path::PathBuf,
     fs,
 };
-use sqlx::{
-    Pool, 
-    Sqlite, 
-    SqlitePool, 
-    pool::PoolConnection
-};
+use sqlx::SqlitePool;
 use chrono::{
     DateTime, 
     NaiveDateTime, 
@@ -21,9 +15,7 @@ use crate::common::ContactId;
 use crate::common::{AccountId, Password};
 
 
-pub type Conn = PoolConnection<Sqlite>;
-
-static DB: OnceLock<Pool<Sqlite>> = OnceLock::new();
+pub static mut MY_POOL: MaybeUninit<SqlitePool> = MaybeUninit::uninit();
 
 
 pub async fn setup() -> anyhow::Result<()> {
@@ -35,11 +27,19 @@ pub async fn setup() -> anyhow::Result<()> {
 
     let pool = SqlitePool::connect(path.as_str()).await?;
 
+    unsafe {
+        MY_POOL = MaybeUninit::new(pool.clone());
+    }
+
     sqlx::migrate!("./migrations").run(&pool).await.unwrap();
 
-    DB.set(pool).unwrap();
-
     Ok(())
+}
+
+#[inline]
+#[allow(static_mut_refs)]
+pub fn pool_ref() -> &'static SqlitePool {
+    unsafe { MY_POOL.assume_init_ref() }
 }
 
 #[cfg(target_os="linux")]
@@ -65,7 +65,6 @@ pub fn get_path() -> PathBuf {
 /// For now, create db in the current directy
 #[cfg(not(target_os="linux"))]
 pub fn get_path() -> PathBuf {
-
     let mut path = PathBuf::new();
     path.push("db.db");
     let _ = fs::File::create_new(path.as_path());
@@ -73,28 +72,13 @@ pub fn get_path() -> PathBuf {
     path
 }
 
-pub async fn get_conn() -> Conn {
-    DB.get()
-        .expect("forgot to setup DB")
-        .acquire()
-        .await
-        .expect("db conn failed")
-}
-
-pub fn sqlite_pool() -> &'static SqlitePool {
-    DB.get().expect("forgot to setup() db")
-}
-
 pub async fn get_accounts() -> Vec<(AccountId, Password)> {
-    let pool = sqlite_pool();
-    //let conn = get_conn().await;
-
     sqlx::query!(
         r#"
 SELECT jid, password FROM account;
     "#
     )
-    .fetch_all(pool)
+    .fetch_all(pool_ref())
     .await
     .unwrap()
     .into_iter()
@@ -107,9 +91,6 @@ pub async fn add_account(
     _resource: Option<&jid::ResourceRef>, 
     password: &str
 ) {
-    
-    let mut conn = get_conn().await;
-
     let jid = jid.as_str();
 
     sqlx::query!(
@@ -120,14 +101,12 @@ VALUES (?1, ?2);
         jid,
         password
     )
-    .execute(&mut *conn)
+    .execute(pool_ref())
     .await
     .unwrap();
 }
 
 pub async fn add_contact(account: &AccountId, contact: &ContactId) {
-    let mut conn = get_conn().await;
-
     let account_jid = account.to_string();
     let contact_jid = contact.to_string();
 
@@ -139,13 +118,12 @@ VALUES (?1, ?2);
         account_jid,
         contact_jid
     )
-    .execute(&mut *conn)
+    .execute(pool_ref())
     .await
     .unwrap();
 }
 
 pub async fn get_contacts(account: &AccountId) -> Vec<ContactId> {
-    let pool = sqlite_pool();
     let account = account.to_string();
     sqlx::query!(
         r#"
@@ -153,7 +131,7 @@ SELECT contact_jid FROM contact WHERE account_jid = ?1;
     "#,
         account
     )
-    .fetch_all(pool)
+    .fetch_all(pool_ref())
     .await
     .unwrap()
     .into_iter()
@@ -178,7 +156,7 @@ ORDER BY timestamp ASC;
         account,
         contact
     )
-    .fetch_all(sqlite_pool())
+    .fetch_all(pool_ref())
     .await
     .unwrap()
     .into_iter()
@@ -187,7 +165,7 @@ ORDER BY timestamp ASC;
 }
 
 pub async fn add_text_message(from: &BareJid, to: &BareJid, body: &str, timestamp: &DateTime<Utc>) {
-    let mut conn = get_conn().await;
+    let pool = pool_ref();
 
     let by = from.to_string();
     let to = to.to_string();
@@ -202,7 +180,7 @@ VALUES (?1, ?2, ?3, ?4);
         body,
         timestamp
     )
-    .execute(&mut *conn)
+    .execute(pool)
     .await
     .unwrap();
 }

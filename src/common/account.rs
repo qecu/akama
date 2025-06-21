@@ -12,6 +12,7 @@ pub struct Account {
 }
 
 impl Account {
+
     pub fn new(jid: Jid, status: Status) -> Self {
         let resource = jid.resource().map(|r| r.to_string());
         let id =Id::new(jid);

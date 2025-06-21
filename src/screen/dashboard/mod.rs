@@ -1,3 +1,4 @@
+use chrono::Timelike;
 use container::background;
 use iced::*;
 use iced::widget::*;
@@ -431,13 +432,32 @@ impl State {
         let mut msg_col = Column::new()
             .padding(20)
             .spacing(4);
-
+        
         let account_id = self.current_account.as_ref().unwrap();
 
         let map = self.contacts.get(account_id)?;
         let contact = map.get(&current_contact)?;
-
+    
+        // let mut prev_stamp: Option<> = None;
         for msg in &contact.chat_history {
+           
+
+            // if let Some(prev_stamp) = prev_stamp {
+            //
+            //     let diff = msg.stamp.timestamp().sub(rhs) sub(prev_stamp.timestamp());
+            //     if diff.second() > 60 {
+            //
+            //         let stamp = container(text(msg.stamp.format("%Y-%m-%d %H:%M").to_string()))
+            //             .width(Fill)
+            //             .align_x(Center)
+            //             .align_y(Center)
+            //             ;
+            //
+            //         msg_col = msg_col.push(stamp);
+            //     }
+            // }
+            // prev_stamp = Some(msg.stamp);
+
 
             let content = match &msg.content {
                 crate::common::message::Content::Text(t) => t,
@@ -449,9 +469,9 @@ impl State {
                 // .align_x(x_align)
                 .width(Shrink)
                 ;
-
+            
             let txt = container(txt)
-                .max_width(400)
+                .max_width(600)
                 .padding(Padding { top: 10.0, right: 16.0, bottom: 10.0, left: 16.0 })
                 .style(|_theme| {
                     container::Style {
@@ -498,9 +518,26 @@ impl State {
 
         let mut disable_message_box = false;
 
+        let contact = self.current_contact.as_ref().unwrap().to_string();
+        let top_info_bar = container(text(contact))
+            .width(Fill)
+            .height(Shrink)
+            .padding(20);
+        
+        let br = container("")
+            .height(1)
+            .width(Fill)
+            .style(|_theme| {
+                container::Style {
+                    background: Some(color!(0x666666).into()),
+                    ..Default::default()
+                }
+            });
+       
         //let ss = Column::with_children([text("sdf")]);
         //self.accounts.get(self.current_account.unwrap())
-        let mut msg_pannel = column![msg_pannel,];
+        let mut msg_pannel = column![top_info_bar, br, msg_pannel,];
+
         if let Some(acc) = &self.current_account {
             if let Some(acc) = self.accounts.get(acc) {
                 match acc.status() {

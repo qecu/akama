@@ -25,6 +25,7 @@ pub struct Backend {
     //client_st: SelectAll<Box<dyn IntoStream>>,
     client_sk: HashMap<AccountId, SplitSink<XmppTlsClient, Stanza>>,
     //client_sk: HashMap<Id, SplitStream<Client<XmppTlsClient>>>
+    // db: SqlitePool,
 }
 
 impl Backend {
